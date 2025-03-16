@@ -28,19 +28,30 @@ export const App: React.FC = () => {
   const [getTodo , setGetTodo] = useState<Todo[]>( [] )
   const [title, setTitle] = useState('')
   const [hasTitleError ,  SetHasTitleError] = useState(false)
+  const [loadTodoError ,  setLoadTodoError] = useState(false)
+
   const [status , setStatus] = useState('all')
 
   const errorTimerRef = useRef<number | null>(null);
 
   const resetError = () => {
-    // Если таймер уже существует, очищаем его
     if (errorTimerRef.current) {
       clearTimeout(errorTimerRef.current);
     }
+    const hideErrors = () => {
+      if (errorTimerRef.current) {
+        clearTimeout(errorTimerRef.current);
+        errorTimerRef.current = null;
+      }
+
+      SetHasTitleError(false);
+      setLoadTodoError(false);
+    };
 
     errorTimerRef.current = window.setTimeout(() => {
       SetHasTitleError(false);
-      errorTimerRef.current = null; // Сбрасываем ref
+      setLoadTodoError(false);
+      errorTimerRef.current = null;
     }, 3000);
   };
 
@@ -49,8 +60,24 @@ export const App: React.FC = () => {
       setTitle('');
   };
 
+
+  const hideErrors = () => {
+    if (errorTimerRef.current) {
+      clearTimeout(errorTimerRef.current);
+      errorTimerRef.current = null;
+    }
+
+    SetHasTitleError(false);
+    setLoadTodoError(false);
+  };
+
   useEffect(() => {
-    getTodos().then(setGetTodo)
+    getTodos()
+      .then(setGetTodo)
+      .catch(() => {
+        setLoadTodoError(true);
+        resetError();
+      } )
   }, []);
 
 
@@ -215,17 +242,20 @@ export const App: React.FC = () => {
 
       <div
         data-cy="ErrorNotification"
-        className={cls('notification is-danger is-light has-text-weight-normal', { 'hidden': !hasTitleError })}
+        className={cls('notification is-danger is-light has-text-weight-normal', { 'hidden': !hasTitleError && !loadTodoError})}
       >
         <button data-cy="HideErrorButton"
                 type="button"
                 className="delete"
-                onClick={resetError}
+                onClick={hideErrors}
         />
         {/*/!* show only one message at a time *!/*/}
 
         {hasTitleError && (
           <p>{Errors.titleError}</p>
+        )}
+        {loadTodoError && (
+          <p>{Errors.loadTodoError}</p>
         )}
       </div>
 
