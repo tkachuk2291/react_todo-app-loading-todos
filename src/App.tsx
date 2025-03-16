@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable jsx-a11y/control-has-associated-label */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { UserWarning } from './UserWarning';
 import { getTodos, USER_ID } from './api/todos';
 import { Todo } from './types/Todo';
@@ -30,10 +30,17 @@ export const App: React.FC = () => {
   const [hasTitleError ,  SetHasTitleError] = useState(false)
   const [status , setStatus] = useState('all')
 
+  const errorTimerRef = useRef<number | null>(null);
 
   const resetError = () => {
-    setTimeout(() => {
+    // Если таймер уже существует, очищаем его
+    if (errorTimerRef.current) {
+      clearTimeout(errorTimerRef.current);
+    }
+
+    errorTimerRef.current = window.setTimeout(() => {
       SetHasTitleError(false);
+      errorTimerRef.current = null; // Сбрасываем ref
     }, 3000);
   };
 
