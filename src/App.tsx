@@ -27,7 +27,7 @@ export const App: React.FC = () => {
 
   const [getTodo , setGetTodo] = useState<Todo[]>( [] )
   const [title, setTitle] = useState('')
-  const [hasTitleError ,  SetHasTitleError] = useState(false)
+  const [hasTitleError ,  setHasTitleError] = useState(false)
   const [loadTodoError ,  setLoadTodoError] = useState(false)
 
   const [status , setStatus] = useState('all')
@@ -38,18 +38,9 @@ export const App: React.FC = () => {
     if (errorTimerRef.current) {
       clearTimeout(errorTimerRef.current);
     }
-    const hideErrors = () => {
-      if (errorTimerRef.current) {
-        clearTimeout(errorTimerRef.current);
-        errorTimerRef.current = null;
-      }
-
-      SetHasTitleError(false);
-      setLoadTodoError(false);
-    };
 
     errorTimerRef.current = window.setTimeout(() => {
-      SetHasTitleError(false);
+      setHasTitleError(false);
       setLoadTodoError(false);
       errorTimerRef.current = null;
     }, 3000);
@@ -67,7 +58,7 @@ export const App: React.FC = () => {
       errorTimerRef.current = null;
     }
 
-    SetHasTitleError(false);
+    setHasTitleError(false);
     setLoadTodoError(false);
   };
 
@@ -89,7 +80,7 @@ export const App: React.FC = () => {
     const  handleSubmit = (event : React.FormEvent<HTMLFormElement> ) => {
         event.preventDefault()
         if (!title){
-          SetHasTitleError(true)
+          setHasTitleError(true)
           resetError()
           return
         }
@@ -186,7 +177,7 @@ export const App: React.FC = () => {
         {getTodo.length > 0 && (
         <footer className="todoapp__footer" data-cy="Footer">
           <span className="todo-count" data-cy="TodosCounter">
-            3 items left
+            {getTodo.filter(todo => !todo.completed).length} items left
           </span>
 
           {/* Active link should have the 'selected' class */}
