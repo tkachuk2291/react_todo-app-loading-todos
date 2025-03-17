@@ -6,31 +6,30 @@ import { getTodos, USER_ID } from './api/todos';
 import { Todo } from './types/Todo';
 import cls from 'classnames';
 
-
 export const App: React.FC = () => {
   if (!USER_ID) {
     return <UserWarning />;
   }
 
-  enum Status  {
-      'all'= 'all',
-      'active' = 'active',
-      'completed' = 'completed'
+  enum Status {
+    'all' = 'all',
+    'active' = 'active',
+    'completed' = 'completed',
   }
 
   enum Errors {
     'titleError' = 'Title should not be empty',
     'addTodoError' = 'Unable to add a todo',
     'updateTodoError' = 'Unable to update a todo',
-    'loadTodoError' = 'Unable to load todos'
+    'loadTodoError' = 'Unable to load todos',
   }
 
-  const [getTodo , setGetTodo] = useState<Todo[]>( [] )
-  const [title, setTitle] = useState('')
-  const [hasTitleError ,  setHasTitleError] = useState(false)
-  const [loadTodoError ,  setLoadTodoError] = useState(false)
+  const [getTodo, setGetTodo] = useState<Todo[]>([]);
+  const [title, setTitle] = useState('');
+  const [hasTitleError, setHasTitleError] = useState(false);
+  const [loadTodoError, setLoadTodoError] = useState(false);
 
-  const [status , setStatus] = useState('all')
+  const [status, setStatus] = useState('all');
 
   const errorTimerRef = useRef<number | null>(null);
 
@@ -46,11 +45,9 @@ export const App: React.FC = () => {
     }, 3000);
   };
 
-
   const reset = () => {
-      setTitle('');
+    setTitle('');
   };
-
 
   const hideErrors = () => {
     if (errorTimerRef.current) {
@@ -68,36 +65,31 @@ export const App: React.FC = () => {
       .catch(() => {
         setLoadTodoError(true);
         resetError();
-      } )
+      });
   }, []);
 
+  const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setTitle(event.target.value);
+  };
 
-  const handleTitleChange =
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setTitle(event.target.value);
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!title) {
+      setHasTitleError(true);
+      resetError();
+      return;
     }
+  };
 
-    const  handleSubmit = (event : React.FormEvent<HTMLFormElement> ) => {
-        event.preventDefault()
-        if (!title){
-          setHasTitleError(true)
-          resetError()
-          return
-        }
-
+  const filteredTodos = getTodo.filter(todo => {
+    if (status === Status.active) {
+      return !todo.completed;
     }
-
-
-    const filteredTodos = getTodo.filter(todo => {
-      if (status === Status.active) {
-        return !todo.completed;
-      }
-      if (status === Status.completed) {
-        return todo.completed;
-      }
-      return true;
-    });
-
+    if (status === Status.completed) {
+      return todo.completed;
+    }
+    return true;
+  });
 
   return (
     <div className="todoapp">
@@ -112,10 +104,7 @@ export const App: React.FC = () => {
           />
 
           {/* Add a todo on form submit */}
-          <form
-            onSubmit={handleSubmit}
-            onReset={reset}
-          >
+          <form onSubmit={handleSubmit} onReset={reset}>
             <input
               data-cy="NewTodoField"
               type="text"
@@ -132,9 +121,10 @@ export const App: React.FC = () => {
             {/*This is a completed todo */}
             {filteredTodos.map(todo => {
               return (
-
-
-                <div data-cy="Todo" className={cls('todo', { 'completed': todo.completed })}>
+                <div
+                  data-cy="Todo"
+                  className={cls('todo', { completed: todo.completed })}
+                >
                   <label className="todo__status-label">
                     <input
                       data-cy="TodoStatus"
@@ -144,11 +134,9 @@ export const App: React.FC = () => {
                     />
                   </label>
 
-                  <span data-cy="TodoTitle"
-                        className="todo__title"
-                  >
-                {todo.title}
-              </span>
+                  <span data-cy="TodoTitle" className="todo__title">
+                    {todo.title}
+                  </span>
 
                   {/* Remove button appears only on hover */}
                   <button
@@ -165,67 +153,70 @@ export const App: React.FC = () => {
                     <div className="loader" />
                   </div>
                 </div>
-              )
+              );
             })}
           </section>
         )}
 
-
         {/* Hide the footer if there are no todos */}
 
-
         {getTodo.length > 0 && (
-        <footer className="todoapp__footer" data-cy="Footer">
-          <span className="todo-count" data-cy="TodosCounter">
-            {getTodo.filter(todo => !todo.completed).length} items left
-          </span>
+          <footer className="todoapp__footer" data-cy="Footer">
+            <span className="todo-count" data-cy="TodosCounter">
+              {getTodo.filter(todo => !todo.completed).length} items left
+            </span>
 
-          {/* Active link should have the 'selected' class */}
-          <nav className="filter" data-cy="Filter">
-            <a
+            {/* Active link should have the 'selected' class */}
+            <nav className="filter" data-cy="Filter">
+              <a
+                href="#/"
+                className={cls('filter__link', {
+                  selected: status === Status.all,
+                })}
+                data-cy="FilterLinkAll"
+                onClick={() => {
+                  setStatus('all');
+                }}
+              >
+                All
+              </a>
 
-              href="#/"
-              className={cls('filter__link', { 'selected': status === Status.all })}
-              data-cy="FilterLinkAll"
-              onClick={() => {
-                setStatus('all')
-              }}
+              <a
+                href="#/active"
+                className={cls('filter__link', {
+                  selected: status === Status.active,
+                })}
+                data-cy="FilterLinkActive"
+                onClick={() => {
+                  setStatus(Status.active);
+                }}
+              >
+                Active
+              </a>
+
+              <a
+                href="#/completed"
+                className={cls('filter__link', {
+                  selected: status === Status.completed,
+                })}
+                data-cy="FilterLinkCompleted"
+                onClick={() => {
+                  setStatus(Status.completed);
+                }}
+              >
+                Completed
+              </a>
+            </nav>
+            {/* this button should be disabled if there are no completed todos */}
+            <button
+              type="button"
+              className="todoapp__clear-completed"
+              data-cy="ClearCompletedButton"
             >
-              All
-            </a>
-
-            <a
-              href="#/active"
-              className={cls('filter__link', { 'selected': status === Status.active })}
-              data-cy="FilterLinkActive"
-              onClick={() => {
-                setStatus(Status.active)
-              }}
-            >
-              Active
-            </a>
-
-            <a
-              href="#/completed"
-              className={cls('filter__link', { 'selected': status === Status.completed })}
-              data-cy="FilterLinkCompleted"
-              onClick={() => {
-                setStatus(Status.completed)
-              }}
-            >
-              Completed
-            </a>
-          </nav>
-          {/* this button should be disabled if there are no completed todos */}
-          <button
-            type="button"
-            className="todoapp__clear-completed"
-            data-cy="ClearCompletedButton"
-          >
-            Clear completed
-          </button>
-        </footer>
-          )}
+              Clear completed
+            </button>
+          </footer>
+        )}
       </div>
 
       {/* DON'T use conditional rendering to hide the notification */}
@@ -233,24 +224,22 @@ export const App: React.FC = () => {
 
       <div
         data-cy="ErrorNotification"
-        className={cls('notification is-danger is-light has-text-weight-normal', { 'hidden': !hasTitleError && !loadTodoError})}
+        className={cls(
+          'notification is-danger is-light has-text-weight-normal',
+          { hidden: !hasTitleError && !loadTodoError },
+        )}
       >
-        <button data-cy="HideErrorButton"
-                type="button"
-                className="delete"
-                onClick={hideErrors}
+        <button
+          data-cy="HideErrorButton"
+          type="button"
+          className="delete"
+          onClick={hideErrors}
         />
         {/*/!* show only one message at a time *!/*/}
 
-        {hasTitleError && (
-          <p>{Errors.titleError}</p>
-        )}
-        {loadTodoError && (
-          <p>{Errors.loadTodoError}</p>
-        )}
+        {hasTitleError && <p>{Errors.titleError}</p>}
+        {loadTodoError && <p>{Errors.loadTodoError}</p>}
       </div>
-
-
     </div>
   );
 };
