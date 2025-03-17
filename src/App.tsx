@@ -149,7 +149,7 @@ export const App: React.FC = () => {
                       data-cy="TodoStatus"
                       type="checkbox"
                       className="todo__status"
-                      checked
+                      checked={todo.completed}
                     />
                   </label>
 
