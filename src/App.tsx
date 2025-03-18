@@ -7,9 +7,7 @@ import { Todo } from './types/Todo';
 import cls from 'classnames';
 
 export const App: React.FC = () => {
-  if (!USER_ID) {
-    return <UserWarning />;
-  }
+
 
   enum Status {
     'all' = 'all',
@@ -24,14 +22,16 @@ export const App: React.FC = () => {
     'loadTodoError' = 'Unable to load todos',
   }
 
-  const [getTodo, setGetTodo] = useState<Todo[]>([]);
+  const [todos, setTodos] = useState<Todo[]>([]);
   const [title, setTitle] = useState('');
   const [hasTitleError, setHasTitleError] = useState(false);
   const [loadTodoError, setLoadTodoError] = useState(false);
-
   const [status, setStatus] = useState('all');
-
   const errorTimerRef = useRef<number | null>(null);
+
+  if (!USER_ID) {
+    return <UserWarning />;
+  }
 
   const resetError = () => {
     if (errorTimerRef.current) {
@@ -61,7 +61,7 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     getTodos()
-      .then(setGetTodo)
+      .then(setTodos)
       .catch(() => {
         setLoadTodoError(true);
         resetError();
@@ -81,7 +81,7 @@ export const App: React.FC = () => {
     }
   };
 
-  const filteredTodos = getTodo.filter(todo => {
+  const filteredTodos = todos.filter(todo => {
     if (status === Status.active) {
       return !todo.completed;
     }
@@ -160,10 +160,10 @@ export const App: React.FC = () => {
 
         {/* Hide the footer if there are no todos */}
 
-        {getTodo.length > 0 && (
+        {todos.length > 0 && (
           <footer className="todoapp__footer" data-cy="Footer">
             <span className="todo-count" data-cy="TodosCounter">
-              {getTodo.filter(todo => !todo.completed).length} items left
+              {todos.filter(todo => !todo.completed).length} items left
             </span>
 
             {/* Active link should have the 'selected' class */}
